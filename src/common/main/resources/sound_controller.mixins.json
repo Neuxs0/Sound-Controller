@@ -1,9 +1,10 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "dev.neuxs.mod_id.mixins",
+  "package": "dev.neuxs.sound_controller.mixins",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "OptionsMenuMixin"
   ],
   "client": [
   ],
