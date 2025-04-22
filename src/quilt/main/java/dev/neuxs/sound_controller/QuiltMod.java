@@ -7,6 +7,6 @@ import org.quiltmc.loader.api.ModContainer;
 public class QuiltMod implements ModInitializer {
 	@Override
 	public void onInitialize(ModContainer mod) {
-		Mod.init("Cosmic Quilt");
+		Mod.init();
 	}
 }
