@@ -1,0 +1,22 @@
+plugins {
+    id 'java'
+    id 'cosmicloom'
+}
+
+loom {
+
+}
+
+sourceSets {
+    main {
+        java { srcDirs = ["../common/main/java"] }
+        resources { srcDirs = ["../common/main/resources"] }
+    }
+}
+
+dependencies {
+    compileOnly loom.cosmicReachClient("alpha", rootProject.property('cosmic_reach_version'))
+    compileOnly loom.cosmicQuilt(rootProject.property('cosmic_quilt_version'))
+
+    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+}

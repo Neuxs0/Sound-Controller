@@ -1,0 +1,30 @@
+{
+  "formatVersion": 1,
+  "group": "${mod_group}",
+  "id": "${mod_id}",
+  "version": "${mod_version}",
+  "name": "${mod_name}",
+  "description": "${mod_description}",
+  "authors": [
+    "Neuxs"
+  ],
+  "license": "${mod_license}",
+  "meta": {
+    "icon": "${mod_id}:icon.png"
+  },
+  "entrypoints": {
+    "client_init": [
+      "${mod_group}.${mod_id}.PuzzleMod"
+    ]
+  },
+  "mixins": [
+    "${mod_id}.mixins.json"
+  ],
+  "depends": {
+    "cosmic-reach": "${cosmic_reach_dependency}",
+    "puzzle-loader": "${puzzle_loader_dependency}"
+  },
+  "accessTransformers": [
+    "${mod_id}.manipulator"
+  ]
+}

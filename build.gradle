@@ -1,0 +1,90 @@
+plugins {
+    id 'java-base'
+    id 'com.github.johnrengelman.shadow'
+}
+
+allprojects {
+    apply plugin: 'java'
+
+    group = rootProject.property('mod_group')
+    version = rootProject.property('mod_version')
+
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+
+    repositories {
+        mavenLocal()
+        maven { url = 'https://maven.fabricmc.net/' }
+        maven { url "https://jitpack.io" }
+        maven { url = 'https://maven.quiltmc.org/repository/release/' }
+        maven { url = 'https://repo.spongepowered.org/maven/' }
+        mavenCentral()
+
+        maven {
+            name = "CRModders"
+            url = "https://maven.codeberg.org/api/v1/groups/CRModders/-/packages/maven"
+        }
+
+        maven {
+            name = "Puzzle"
+            url = "https://maven.puzzlemc.org/repository/maven-public/"
+        }
+
+        ivy {
+            name "Cosmic Reach"
+            url "https://github.com/CRModders/CosmicArchive/raw/main/versions"
+            patternLayout {
+                artifact "[classifier]/[revision]/client/Cosmic-Reach-[revision].jar"
+            }
+            metadataSources { artifact() }
+            content { includeModule "finalforeach", "cosmicreach" }
+        }
+    }
+
+    tasks.withType(JavaCompile).configureEach {
+        options.encoding = 'UTF-8'
+    }
+}
+
+tasks.register('universalJar', com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar) {
+    dependsOn project(':src:common').jar
+    dependsOn project(':src:puzzle').processResources
+    dependsOn project(':src:puzzle').classes
+    dependsOn project(':src:quilt').processResources
+    dependsOn project(':src:quilt').classes
+
+    archiveBaseName = rootProject.property('mod_name').replace(' ', '_')
+    archiveVersion = rootProject.property('mod_version')
+    archiveClassifier = 'universal'
+
+    from project(':src:common').sourceSets.main.output
+    from project(':src:puzzle').sourceSets.main.output.classesDirs
+    from project(':src:quilt').sourceSets.main.output.classesDirs
+
+    from(project(':src:puzzle').tasks.named('processResources').map { it.destinationDir }) {
+        include 'puzzle.mod.json'
+        include '*.manipulator'
+    }
+    from(project(':src:quilt').tasks.named('processResources').map { it.destinationDir }) {
+        include 'quilt.mod.json'
+    }
+
+    manifest {
+        attributes('MixinConfigs': "${rootProject.property('mod_id')}.mixins.json")
+    }
+
+    mergeServiceFiles()
+}
+
+tasks.named('build') {
+    dependsOn universalJar
+    dependsOn project(':src:puzzle').tasks.named('shadowJar')
+    dependsOn project(':src:quilt').tasks.named('jar')
+}
+
+tasks.register('cleanDist', Delete) {
+    delete file('dist')
+}
+tasks.named('clean') {
+    dependsOn cleanDist
+}

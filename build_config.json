@@ -1,0 +1,15 @@
+{
+    "enable_archiving": true,
+    "archive_every_build": true,
+    "archive_directory": "build_archive",
+    "comment": "all, universal, puzzle, quilt",
+    "build_targets": [
+        "universal"
+    ],
+    "build_naming_scheme": {
+        "universal": "${mod_name}-${version}-universal.jar",
+        "puzzle": "${mod_name}-${version}-puzzle.jar",
+        "quilt": "${mod_name}-${version}-quilt.jar"
+    },
+    "custom_copy_paths": []
+}

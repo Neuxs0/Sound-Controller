@@ -1,0 +1,68 @@
+plugins {
+    id "application"
+    id 'cosmicloom'
+}
+
+sourceSets {
+    main {
+        java { srcDirs = ["../quilt/main/java"] }
+        resources { srcDirs = ["../quilt/main/resources"] }
+    }
+}
+
+loom {}
+
+dependencies {
+    implementation project(':src:common')
+
+    cosmicReach(loom.cosmicReachClient("alpha", rootProject.property('cosmic_reach_version')))
+    modImplementation(loom.cosmicQuilt(rootProject.property('cosmic_quilt_version')))
+}
+
+processResources {
+    from project(':src:common').sourceSets.main.resources
+
+    inputs.property 'mod_version', rootProject.property('mod_version')
+    inputs.property 'mod_id', rootProject.property('mod_id')
+    inputs.property 'mod_name', rootProject.property('mod_name')
+    inputs.property 'mod_group', rootProject.property('mod_group')
+    inputs.property 'mod_description', rootProject.property('mod_description')
+
+    filesMatching('*.json') {
+        expand(
+                'mod_version'               : rootProject.property('mod_version'),
+                'mod_id'                    : rootProject.property('mod_id'),
+                'mod_name'                  : rootProject.property('mod_name'),
+                'mod_group'                 : rootProject.property('mod_group'),
+                'mod_description'           : rootProject.property('mod_description'),
+                'mod_license'               : rootProject.property('mod_license'),
+                'cosmic_reach_dependency'   : rootProject.property('cosmic_reach_dependency'),
+                'cosmic_quilt_dependency'   : rootProject.property('cosmic_quilt_dependency'),
+                'homepage_link'             : rootProject.property('homepage_link'),
+                'issues_link'               : rootProject.property('issues_link'),
+                'sources_link'              : rootProject.property('sources_link')
+        )
+    }
+}
+
+application {
+    mainClass = "org.quiltmc.loader.impl.launch.knot.KnotClient"
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+jar {
+    enabled = true
+    archiveFileName = "${rootProject.property('mod_name').replace(' ', '_')}-quilt-${rootProject.property('mod_version')}.jar"
+
+    from sourceSets.main.output
+
+    manifest {
+        attributes('MixinConfigs': "${rootProject.property('mod_id')}.mixins.json")
+    }
+
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+}

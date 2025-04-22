@@ -1,0 +1,24 @@
+buildscript {
+    repositories {
+        maven { url "https://jitpack.io" }
+        maven { url = 'https://maven.fabricmc.net/' }
+        mavenCentral()
+        gradlePluginPortal()
+        mavenLocal()
+        maven {
+            name = "CRModders"
+            url = "https://maven.codeberg.org/api/v1/groups/CRModders/-/packages/maven"
+        }
+    }
+    dependencies {
+        classpath "org.codeberg.CRModders:cosmic-loom:$cosmic_loom_gradle_version"
+        classpath "com.github.johnrengelman:shadow:$shadow_gradle_version"
+        classpath "com.github.PuzzleLoader:jigsaw:$jigsaw_gradle_version"
+    }
+}
+
+include ':src:common'
+include ':src:puzzle'
+include ':src:quilt'
+
+rootProject.name = mod_name
