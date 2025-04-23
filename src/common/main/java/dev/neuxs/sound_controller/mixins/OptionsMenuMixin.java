@@ -2,6 +2,7 @@ package dev.neuxs.sound_controller.mixins;
 
 import com.badlogic.gdx.math.Vector2;
 import dev.neuxs.sound_controller.Mod;
+import dev.neuxs.sound_controller.ui.SoundControllerMenu;
 import finalforeach.cosmicreach.gamestates.GameState;
 import finalforeach.cosmicreach.gamestates.OptionsMenu;
 import finalforeach.cosmicreach.settings.SoundSettings;
@@ -27,13 +28,7 @@ public abstract class OptionsMenuMixin extends GameState {
             @Override
             public void onClick() {
                 super.onClick();
-                float currentVolume = SoundSettings.soundVolume.getValueAsFloat();
-                if (currentVolume > 0) {
-                    SoundSettings.soundVolume.setValue(0.0f);
-                } else {
-                    SoundSettings.soundVolume.setValue(0.5f);
-                }
-                Mod.LOGGER.info("Sound Toggle Button Clicked! Volume set to: {}", SoundSettings.soundVolume.getValueAsFloat());
+                GameState.switchToGameState(new SoundControllerMenu(GameState.currentGameState));
             }
         };
         soundToggleButton.setSize(buttonTextDim.x + 10f, 50f);

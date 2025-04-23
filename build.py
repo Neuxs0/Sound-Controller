@@ -42,8 +42,7 @@ STANDARD_CLEAN_FOLDERS_REL = [
     os.path.join('src', 'common', 'build'),
     os.path.join('src', 'puzzle', '.gradle'),
     os.path.join('src', 'puzzle', 'build'),
-    os.path.join('src', 'quilt', 'build'),
-    os.path.relpath(DEFAULT_DIST_DIR, PROJECT_ROOT)
+    os.path.join('src', 'quilt', 'build')
 ]
 CACHE_CLEAN_FOLDERS_REL = [
     '.gradle',
@@ -539,6 +538,7 @@ if __name__ == "__main__":
     mod_name = get_mod_name_from_gradle_properties(GRADLE_PROPERTIES_FILE, verbose=verbose)
     mod_version = extract_version_from_gradle_properties(GRADLE_PROPERTIES_FILE)
 
+    if os.path.exists(DEFAULT_DIST_DIR): shutil.rmtree(DEFAULT_DIST_DIR)
     if args.clean_cache:
         if verbose: print("Performing pre-build cleanup (including cache)...")
         clean_build_folders(config, verbose=verbose, clean_cache=True)
