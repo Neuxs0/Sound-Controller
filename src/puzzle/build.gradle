@@ -17,7 +17,6 @@ loom {
             sourceSet sourceSets.main
         }
     }
-    accessWidenerPath = file("../puzzle/main/resources/${property('mod_id')}.manipulator")
 }
 
 dependencies {

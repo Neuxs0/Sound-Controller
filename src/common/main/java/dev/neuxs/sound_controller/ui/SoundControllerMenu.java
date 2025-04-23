@@ -26,6 +26,7 @@ public class SoundControllerMenu extends GameState {
         this.previousGameState = previousGameState;
     }
 
+
     @Override
     public void create() {
         super.create();
@@ -100,7 +101,7 @@ public class SoundControllerMenu extends GameState {
                 this.setText(prefix + formattedValue);
             }
         };
-        slider.setWidth(250.0F);
+        slider.setWidth(250.0f);
         slider.setValue(setting.getValueAsFloat());
         return slider;
     }
