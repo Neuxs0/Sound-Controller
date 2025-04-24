@@ -3,106 +3,282 @@ package dev.neuxs.sound_controller.ui;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
+import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
+import dev.neuxs.sound_controller.utils.SoundHelper;
 import finalforeach.cosmicreach.gamestates.GameState;
 import finalforeach.cosmicreach.lang.Lang;
 import finalforeach.cosmicreach.settings.INumberSetting;
 import finalforeach.cosmicreach.settings.SoundSettings;
 import finalforeach.cosmicreach.settings.types.IntSetting;
+import finalforeach.cosmicreach.ui.FontRenderer;
+import finalforeach.cosmicreach.ui.GameStyles;
 import finalforeach.cosmicreach.ui.widgets.CRButton;
+import finalforeach.cosmicreach.ui.widgets.CRLabel;
 import finalforeach.cosmicreach.ui.widgets.CRSlider;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class SoundControllerMenu extends GameState {
     private final GameState previousGameState;
     private final NumberFormat intFormat = new DecimalFormat("#");
     private final NumberFormat percentFormat = Lang.getPercentFormatter();
+    private Table soundListTable;
+    private ScrollPane scrollPane;
+    private TextField searchField;
+    private List<String> allSoundIdsSorted;
+    private CRButton backButton;
+    private CRSlider soundSlider;
+    private CRSlider musicSlider;
+    private CRSlider musicFreqSlider;
+    private CRLabel searchLabel;
+    private static final float PADDING = 10f;
+    private static final float TOP_BAR_HEIGHT = 50f;
+    private static final float SEARCH_BAR_HEIGHT = 30f;
+    private static final float BUTTON_WIDTH = 150f;
+    private static final float SLIDER_WIDTH = 200f;
+    private static final float ELEMENT_SPACING = 5f;
+    private static final float BACK_BUTTON_RIGHT_MARGIN = 20f;
+    private static final float SEARCH_LABEL_Y_OFFSET = 2f;
 
     public SoundControllerMenu(GameState previousGameState) {
         this.previousGameState = previousGameState;
     }
-
 
     @Override
     public void create() {
         super.create();
         Gdx.input.setInputProcessor(this.stage);
 
-        CRButton backButton = new CRButton("Back") {
+        float currentX = PADDING;
+        float topY = stage.getHeight() - PADDING - TOP_BAR_HEIGHT;
+
+        backButton = new CRButton("Back") {
             @Override
             public void onClick() {
                 super.onClick();
                 GameState.switchToGameState(previousGameState);
             }
         };
-        backButton.setSize(150f, 50f);
-        backButton.setPosition(5f, this.newUiViewport.getWorldHeight() - 5f - backButton.getHeight());
-        this.stage.addActor(backButton);
+        backButton.setBounds(currentX, topY, BUTTON_WIDTH, TOP_BAR_HEIGHT);
+        stage.addActor(backButton);
+        currentX += BUTTON_WIDTH + BACK_BUTTON_RIGHT_MARGIN;
 
-        CRSlider soundSlider = this.createSettingsCRSlider(SoundSettings.soundVolume, "Global", 0.0f, 1.0f, 0.01f, this.percentFormat);
-        CRSlider musicSlider = this.createSettingsCRSlider(SoundSettings.musicVolume, "Music", 0.0f, 1.0f, 0.01f, this.percentFormat);
-        CRSlider musicFreqSlider = this.createSettingsCRSlider(SoundSettings.musicFrequency, "Music Freq (in Minutes)", 0.0f, 20.0f, 1.0f, this.intFormat);
+        soundSlider = this.createSettingsCRSlider(SoundSettings.soundVolume, "Global: ", 1.0f, 0.01f, this.percentFormat, false);
+        soundSlider.setBounds(currentX, topY, SLIDER_WIDTH, TOP_BAR_HEIGHT);
+        stage.addActor(soundSlider);
+        currentX += SLIDER_WIDTH + ELEMENT_SPACING;
 
-        Table table = new Table();
-        table.setFillParent(true);
-        this.stage.addActor(table);
-        table.add().height(50.0F).expand();
-        table.row();
-        table.add().expand();
-        table.add(soundSlider).width(250.0f).top().padRight(12.0f);
-        table.add(musicSlider).width(250.0f).top();
-        table.add(musicFreqSlider).width(250.0f).top().padLeft(12.0f);
-        table.add().expand();
-        table.row();
-        table.add().expand();
+        musicSlider = this.createSettingsCRSlider(SoundSettings.musicVolume, "Music: ", 1.0f, 0.01f, this.percentFormat, false);
+        musicSlider.setBounds(currentX, topY, SLIDER_WIDTH, TOP_BAR_HEIGHT);
+        stage.addActor(musicSlider);
+        currentX += SLIDER_WIDTH + ELEMENT_SPACING;
+
+        musicFreqSlider = this.createSettingsCRSlider(SoundSettings.musicFrequency, "Music Freq (min): ", 20.0f, 1.0f, this.intFormat, false);
+        musicFreqSlider.setBounds(currentX, topY, SLIDER_WIDTH, TOP_BAR_HEIGHT);
+        stage.addActor(musicFreqSlider);
+
+        float searchY = topY - PADDING - SEARCH_BAR_HEIGHT;
+        currentX = PADDING;
+
+        searchLabel = new CRLabel("Search:");
+        searchLabel.pack();
+        searchLabel.setPosition(currentX, searchY + (SEARCH_BAR_HEIGHT - searchLabel.getHeight()) / 2f + SEARCH_LABEL_Y_OFFSET);
+        stage.addActor(searchLabel);
+        currentX += searchLabel.getWidth() + ELEMENT_SPACING;
+
+        searchField = new TextField("", GameStyles.textstyle);
+        searchField.setMessageText("Search Sounds...");
+        searchField.setTextFieldListener((textField, c) -> filterAndRebuildSoundList(textField.getText()));
+        float searchFieldWidth = stage.getWidth() - currentX - PADDING;
+        searchField.setBounds(currentX, searchY, searchFieldWidth, SEARCH_BAR_HEIGHT);
+        stage.addActor(searchField);
+
+        soundListTable = new Table();
+        soundListTable.top().left();
+
+        scrollPane = new ScrollPane(soundListTable, GameStyles.styleTooltip.background == null ? new ScrollPane.ScrollPaneStyle() : new ScrollPane.ScrollPaneStyle(GameStyles.styleTooltip.background, null, null, null, null));
+        scrollPane.setFadeScrollBars(false);
+        scrollPane.setScrollingDisabled(true, false);
+        scrollPane.setForceScroll(false, true);
+
+        float scrollPaneTop = searchY - PADDING;
+        float scrollPaneBottom = PADDING;
+        float scrollPaneHeight = scrollPaneTop - scrollPaneBottom;
+        scrollPane.setBounds(PADDING, scrollPaneBottom, stage.getWidth() - 2 * PADDING, scrollPaneHeight);
+
+        scrollPane.addListener(new InputListener() {
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                if (stage != null && stage.getKeyboardFocus() == searchField) {
+                    stage.setKeyboardFocus(null);
+                    return true;
+                }
+                return false;
+            }
+
+            @Override
+            public boolean scrolled(InputEvent event, float x, float y, float amountX, float amountY) {
+                return false;
+            }
+        });
+
+        stage.addActor(scrollPane);
+
+        allSoundIdsSorted = new ArrayList<>(SoundHelper.getAllSoundIdentifiers().keySet());
+        Collections.sort(allSoundIdsSorted);
+        filterAndRebuildSoundList("");
+
+        this.stage.setScrollFocus(scrollPane);
+    }
+
+    @Override
+    public void resize(int width, int height) {
+        super.resize(width, height);
+
+        if (backButton == null) return;
+
+        float currentX = PADDING;
+        float topY = stage.getHeight() - PADDING - TOP_BAR_HEIGHT;
+
+        backButton.setBounds(currentX, topY, BUTTON_WIDTH, TOP_BAR_HEIGHT);
+        currentX += BUTTON_WIDTH + BACK_BUTTON_RIGHT_MARGIN;
+
+        soundSlider.setBounds(currentX, topY, SLIDER_WIDTH, TOP_BAR_HEIGHT);
+        currentX += SLIDER_WIDTH + ELEMENT_SPACING;
+
+        musicSlider.setBounds(currentX, topY, SLIDER_WIDTH, TOP_BAR_HEIGHT);
+        currentX += SLIDER_WIDTH + ELEMENT_SPACING;
+
+        musicFreqSlider.setBounds(currentX, topY, SLIDER_WIDTH, TOP_BAR_HEIGHT);
+
+        float searchY = topY - PADDING - SEARCH_BAR_HEIGHT;
+        currentX = PADDING;
+
+        searchLabel.pack();
+        Vector2 searchLabelDim = FontRenderer.getTextDimensions(this.newUiViewport, String.valueOf(searchLabel.getText()), new Vector2(0f, 0f));
+        searchLabel.setPosition(currentX, searchY + (SEARCH_BAR_HEIGHT - searchLabel.getHeight()) / 2f + SEARCH_LABEL_Y_OFFSET - searchLabelDim.y / 2);
+        currentX += searchLabel.getWidth() + ELEMENT_SPACING;
+
+        float searchFieldWidth = stage.getWidth() - currentX - PADDING;
+        searchField.setBounds(currentX, searchY, searchFieldWidth, SEARCH_BAR_HEIGHT);
+
+        float scrollPaneTop = searchY - PADDING;
+        float scrollPaneBottom = PADDING;
+        float scrollPaneHeight = scrollPaneTop - scrollPaneBottom;
+        scrollPane.setBounds(PADDING, scrollPaneBottom, stage.getWidth() - 2 * PADDING, scrollPaneHeight);
+
+        soundListTable.invalidateHierarchy();
+        scrollPane.layout();
     }
 
     @Override
     public void render() {
         super.render();
-        this.stage.act();
+        this.stage.act(Gdx.graphics.getDeltaTime());
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) || Gdx.input.isButtonJustPressed(Input.Buttons.BACK)) {
-            GameState.switchToGameState(previousGameState);
+            if (this.stage != null && this.stage.getKeyboardFocus() == searchField) this.stage.setKeyboardFocus(null);
+            else GameState.switchToGameState(previousGameState);
         }
 
         ScreenUtils.clear(0.145F, 0.078F, 0.153F, 1.0F, true);
 
-        Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
-        Gdx.gl.glDepthFunc(GL20.GL_LESS);
-        Gdx.gl.glEnable(GL20.GL_CULL_FACE);
-        Gdx.gl.glCullFace(GL20.GL_BACK);
         Gdx.gl.glEnable(GL20.GL_BLEND);
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-        Gdx.gl.glCullFace(GL20.GL_FRONT);
+        Gdx.gl.glDisable(GL20.GL_CULL_FACE);
+        Gdx.gl.glDisable(GL20.GL_DEPTH_TEST);
+
         this.stage.draw();
+
+        Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
+        Gdx.gl.glEnable(GL20.GL_CULL_FACE);
     }
 
-    private CRSlider createSettingsCRSlider(final INumberSetting setting, final String prefix, float min, float max, float stepSize, final NumberFormat valueTextFormat) {
-        CRSlider slider = new CRSlider(null, min, max, stepSize, false) {
+    private CRSlider createSettingsCRSlider(final INumberSetting setting, final String prefix, float max, float stepSize, final NumberFormat valueTextFormat, final boolean isReadOnly) {
+        float initialValue = isReadOnly ? 1.0f : setting.getValueAsFloat();
+        String initialText = prefix + formatValue(initialValue, valueTextFormat, setting);
+
+        CRSlider slider = new CRSlider(initialText, 0.0f, max, stepSize, false) {
+            @Override
             protected void onChangeEvent(ChangeListener.ChangeEvent event) {
                 float currentValue = this.getValue();
-                setting.setValue(currentValue);
-                String formattedValue;
-                if (valueTextFormat == null) {
-                    if (setting instanceof IntSetting) {
-                        formattedValue = "" + (int)currentValue;
+                if (!isReadOnly) {
+                    if (Math.abs(setting.getValueAsFloat() - currentValue) > stepSize / 10.0f) {
+                        setting.setValue(currentValue);
+                        this.setText(prefix + formatValue(setting.getValueAsFloat(), valueTextFormat, setting));
                     } else {
-                        formattedValue = "" + currentValue;
+                        this.setText(prefix + formatValue(setting.getValueAsFloat(), valueTextFormat, setting));
                     }
                 } else {
-                    formattedValue = valueTextFormat.format(currentValue);
+                    this.setText(prefix + formatValue(currentValue, valueTextFormat, setting));
                 }
-
-                this.setText(prefix + formattedValue);
             }
         };
-        slider.setWidth(250.0f);
-        slider.setValue(setting.getValueAsFloat());
+        slider.setValue(initialValue);
         return slider;
+    }
+
+    private String formatValue(float value, NumberFormat format, INumberSetting setting) {
+        if (format == null) {
+            if (setting instanceof IntSetting) return "" + (int)value;
+            else return String.format("%.2f", value);
+        } else {
+            float epsilon = 0.0001f;
+            if (format == percentFormat && Math.abs(value - 1.0f) < epsilon) return "100%";
+            if (format == percentFormat && Math.abs(value - 0.0f) < epsilon) return "0%";
+            return format.format(value);
+        }
+    }
+
+    private void filterAndRebuildSoundList(String filterText) {
+        soundListTable.clearChildren(true);
+
+        if (allSoundIdsSorted == null) {
+            soundListTable.add(new CRLabel("Sound list not loaded.", GameStyles.styleText));
+            return;
+        }
+
+        String filterLower = filterText.toLowerCase().trim();
+        boolean hasFilter = !filterLower.isEmpty();
+
+        for (final String soundId : allSoundIdsSorted) {
+            if (hasFilter && !soundId.toLowerCase().contains(filterLower)) continue;
+
+            Table soundRowTable = new Table();
+
+            CRLabel soundLabel = new CRLabel(soundId + ": ");
+            soundLabel.setEllipsis("...");
+            soundLabel.setAlignment(Align.left);
+            soundRowTable.add(soundLabel).minWidth(150f).growX().padRight(ELEMENT_SPACING);
+
+            final INumberSetting displayOnlySetting = new INumberSetting() {
+                @Override public float getValueAsFloat() {
+                    return 1.0f;
+                }
+                @Override public void setValue(float newValue) {}
+            };
+
+            CRSlider individualSlider = this.createSettingsCRSlider(
+                    displayOnlySetting, "", 1.0f, 0.01f,
+                    this.percentFormat, true
+            );
+            soundRowTable.add(individualSlider).width(SLIDER_WIDTH * 1.5f).right();
+
+            soundListTable.add(soundRowTable).expandX().fillX().pad(2f).row();
+        }
+        soundListTable.invalidateHierarchy();
+        if (scrollPane != null) scrollPane.layout();
     }
 }
