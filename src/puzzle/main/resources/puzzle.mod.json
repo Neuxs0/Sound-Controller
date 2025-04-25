@@ -23,8 +23,5 @@
   "depends": {
     "cosmic-reach": "${cosmic_reach_dependency}",
     "puzzle-loader": "${puzzle_loader_dependency}"
-  },
-  "accessTransformers": [
-    "${mod_id}.manipulator"
-  ]
+  }
 }
