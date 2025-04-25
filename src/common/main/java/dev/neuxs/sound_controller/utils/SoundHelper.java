@@ -9,7 +9,6 @@ import finalforeach.cosmicreach.util.Identifier;
 import java.util.HashMap;
 import java.util.Map;
 
-@SuppressWarnings("unused")
 public class SoundHelper {
 
     public static Map<String, Identifier> getAllSoundIdentifiers() {

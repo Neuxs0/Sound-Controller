@@ -1,11 +1,9 @@
 package dev.neuxs.sound_controller.mixins;
 
 import com.badlogic.gdx.math.Vector2;
-import dev.neuxs.sound_controller.Mod;
 import dev.neuxs.sound_controller.ui.SoundControllerMenu;
 import finalforeach.cosmicreach.gamestates.GameState;
 import finalforeach.cosmicreach.gamestates.OptionsMenu;
-import finalforeach.cosmicreach.settings.SoundSettings;
 import finalforeach.cosmicreach.ui.FontRenderer;
 import finalforeach.cosmicreach.ui.widgets.CRButton;
 import org.spongepowered.asm.mixin.Mixin;
