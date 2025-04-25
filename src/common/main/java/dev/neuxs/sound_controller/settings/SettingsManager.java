@@ -180,17 +180,24 @@ public class SettingsManager {
         }
     }
 
-    public static SoundConfig getConfig() {
-        return getInstance().currentConfig;
-    }
-
     public static float getVolume(String soundId) {
-        return getConfig().getVolume(soundId);
+        SoundConfig config = getInstance().currentConfig;
+        if (config == null) {
+            Mod.LOGGER.error("getVolume called but currentConfig is NULL! ID='{}'", soundId);
+            return 1.0f;
+        }
+
+        return config.getVolume(soundId);
     }
 
     public static void setVolume(String soundId, float volume) {
-        boolean changed = getInstance().currentConfig.setVolume(soundId, volume);
-        if (changed) saveSettings();
+        SettingsManager manager = getInstance();
+        if (manager.currentConfig == null) {
+            Mod.LOGGER.error("setVolume called but currentConfig is NULL! Cannot set Volume for ID='{}'", soundId);
+            return;
+        }
+
+        if (manager.currentConfig.setVolume(soundId, volume)) saveSettings();
     }
 
     public static void saveSettings() {

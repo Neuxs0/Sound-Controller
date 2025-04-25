@@ -1,6 +1,7 @@
 package dev.neuxs.sound_controller;
 
 import dev.neuxs.sound_controller.settings.SettingsManager;
+import dev.neuxs.sound_controller.utils.SoundHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
