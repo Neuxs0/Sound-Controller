@@ -5,8 +5,13 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
+import de.pottgames.tuningfork.jukebox.JukeBox;
+import de.pottgames.tuningfork.jukebox.song.SongSettings;
 import dev.neuxs.sound_controller.Mod;
 import dev.neuxs.sound_controller.utils.SoundHelper;
+import finalforeach.cosmicreach.audio.GameJukeBox;
+import finalforeach.cosmicreach.audio.GameMusicManager;
+import finalforeach.cosmicreach.audio.SoundManager;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -196,6 +201,8 @@ public class SettingsManager {
             Mod.LOGGER.error("setVolume called but currentConfig is NULL! Cannot set Volume for ID='{}'", soundId);
             return;
         }
+
+//        if (soundId.contains("music")) GameMusicManager.forceSongChange(); // Any proper implementation is just taking far too long
 
         if (manager.currentConfig.setVolume(soundId, volume)) saveSettings();
     }
