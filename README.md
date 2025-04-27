@@ -3,7 +3,7 @@ Sound Controller is a mod to allow you to change the volume of any sound you wan
 
 ## Dependencies:
 - Puzzle Loader any version or Cosmic Quilt any version
-- Cosmic Reach Alpha v0.4.7
+- Cosmic Reach Alpha v0.4.7 or newer
 
 ## How to use
 - Run the mod as any other Quilt/Puzzle mod
