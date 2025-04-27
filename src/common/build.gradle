@@ -17,6 +17,28 @@ sourceSets {
 dependencies {
     compileOnly loom.cosmicReachClient("alpha", rootProject.property('cosmic_reach_version'))
     compileOnly loom.cosmicQuilt(rootProject.property('cosmic_quilt_version'))
+}
 
-    implementation "com.google.code.gson:gson:${rootProject.property('gson_version')}"
+processResources {
+    inputs.property 'mod_version', rootProject.property('mod_version')
+    inputs.property 'mod_id', rootProject.property('mod_id')
+    inputs.property 'mod_name', rootProject.property('mod_name')
+    inputs.property 'mod_group', rootProject.property('mod_group')
+    inputs.property 'mod_description', rootProject.property('mod_description')
+
+    filesMatching('*.json') {
+        expand(
+                'mod_version'               : rootProject.property('mod_version'),
+                'mod_id'                    : rootProject.property('mod_id'),
+                'mod_name'                  : rootProject.property('mod_name'),
+                'mod_group'                 : rootProject.property('mod_group'),
+                'mod_description'           : rootProject.property('mod_description'),
+                'mod_license'               : rootProject.property('mod_license'),
+                'cosmic_reach_dependency'   : rootProject.property('cosmic_reach_dependency'),
+                'puzzle_loader_dependency'  : rootProject.property('puzzle_loader_dependency'),
+                'homepage_link'             : rootProject.property('homepage_link'),
+                'issues_link'               : rootProject.property('issues_link'),
+                'sources_link'              : rootProject.property('sources_link')
+        )
+    }
 }
