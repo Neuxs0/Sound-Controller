@@ -25,15 +25,13 @@ public class CRImageButton extends Button {
         onClickSound = SoundManager.INSTANCE.loadSound(GameAssetLoader.loadAsset("sounds/ui/e-button-click.ogg"));
     }
 
-    private final Image imageActor;
-
     public CRImageButton(TextureRegion imageRegion) {
         super(createStyleFromTextButtonStyle());
 
-        this.imageActor = new Image(new TextureRegionDrawable(imageRegion));
-        this.imageActor.setScaling(Scaling.fit);
-        this.add(this.imageActor).grow();
-        this.imageActor.setTouchable(Touchable.disabled);
+        Image imageActor = new Image(new TextureRegionDrawable(imageRegion));
+        imageActor.setScaling(Scaling.fit);
+        this.add(imageActor).grow();
+        imageActor.setTouchable(Touchable.disabled);
 
         this.addListener(this::onEvent);
     }
@@ -67,8 +65,4 @@ public class CRImageButton extends Button {
     }
 
     public void onClick() {}
-
-    public void setImageRegion(TextureRegion imageRegion) {
-        if (this.imageActor != null) this.imageActor.setDrawable(new TextureRegionDrawable(imageRegion));
-    }
 }

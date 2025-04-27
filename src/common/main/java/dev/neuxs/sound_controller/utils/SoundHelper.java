@@ -3,11 +3,8 @@ package dev.neuxs.sound_controller.utils;
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.ObjectSet;
 import de.pottgames.tuningfork.SoundBuffer;
-import de.pottgames.tuningfork.jukebox.song.Song;
 import dev.neuxs.sound_controller.Mod;
 import finalforeach.cosmicreach.GameAssetLoader;
-import finalforeach.cosmicreach.audio.GameSong;
-import finalforeach.cosmicreach.sounds.GameSound;
 import finalforeach.cosmicreach.util.Identifier;
 
 import java.util.Collections;
@@ -20,8 +17,6 @@ public class SoundHelper {
 
     private static volatile Map<String, Identifier> soundStringToIdentifierMap = null;
     private static final Object stringMapLock = new Object();
-    public static volatile GameSong lastChosenGameSong = null;
-    public static volatile Song currentJukeboxSong = null;
 
     public static void registerSoundBuffer(Identifier id, SoundBuffer buffer) {
         if (id != null && buffer != null) soundBufferToIdentifierMap.put(buffer, id);
